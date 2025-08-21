@@ -1,0 +1,114 @@
+import serial
+import pandas as pd
+import datetime
+import os
+import tkinter as tk
+from tkinter import messagebox
+import threading
+
+# Initialize serial connection
+try:
+    ser = serial.Serial('COM6', 9600, timeout=1)  # Change 'COM6' to the port your Arduino is connected to
+except serial.SerialException as e:
+    print(f"Error: {e}")
+    exit()
+
+# Create an empty DataFrame to store sensor data
+columns = ["EDA Value", "Heart Rate", "Emotion"]
+sensor_data = pd.DataFrame(columns=columns)
+
+# Flag to indicate whether to keep reading data
+keep_reading = False
+
+# Current sensor values
+current_eda_value = 0.0
+current_heart_rate = 0
+
+def read_serial():
+    global current_eda_value, current_heart_rate, keep_reading
+    while keep_reading:
+        # Read data from the Arduino
+        arduino_data = ser.readline().decode('ascii', errors='replace').strip()
+        print(f"Received: {arduino_data}")  # Debugging: show raw data
+
+        # Check if the data contains the expected markers
+        if "EDA (Conductance):" in arduino_data and "Pulse Value:" in arduino_data:
+            try:
+                # Split and extract data based on known format
+                parts = arduino_data.split(", ")
+                conductance = float(parts[1].split(": ")[1])
+                bpm = int(parts[3].split(": ")[1])  # Extract BPM
+
+                # Update global variables with current sensor values
+                current_eda_value = conductance
+                current_heart_rate = bpm
+                
+                print(f"Updated EDA: {current_eda_value}, Heart Rate: {current_heart_rate}")  # Debugging
+
+            except ValueError as e:
+                print(f"Error: {e}")
+
+# Function to save data to an Excel file
+def save_to_excel(data):
+    # Get the current date and time
+    timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+
+    # Construct the file name with the timestamp
+    file_name = f"sensor_data_{timestamp}.xlsx"
+
+    # Save DataFrame to Excel file with the timestamped file name
+    file_path = os.path.join(os.getcwd(), file_name)
+    data.to_excel(file_path, index=False)
+    print(f"Data saved to {file_path}")
+
+# Function to handle button clicks and save data
+def save_emotion_data(emotion):
+    global sensor_data, current_eda_value, current_heart_rate
+    new_data = pd.DataFrame([[current_eda_value, current_heart_rate, emotion]], columns=columns)
+    sensor_data = pd.concat([sensor_data, new_data], ignore_index=True)
+    print(f"Data for {emotion} saved: EDA Value: {current_eda_value}, Heart Rate: {current_heart_rate}")
+    messagebox.showinfo("Success", f"Data for {emotion} saved.")
+
+# Function to save all data to Excel
+def save_all_data():
+    if not sensor_data.empty:
+        save_to_excel(sensor_data)
+        messagebox.showinfo("Success", "All data saved to Excel.")
+    else:
+        messagebox.showwarning("Warning", "No data to save.")
+
+# Start reading serial data in a separate thread
+def start_reading():
+    global keep_reading
+    keep_reading = True
+    threading.Thread(target=read_serial, daemon=True).start()
+
+# Stop reading serial data
+def stop_reading():
+    global keep_reading
+    keep_reading = False
+    ser.close()
+
+# Create the GUI
+root = tk.Tk()
+root.title("Emotion Data Recorder")
+
+# Create buttons for emotions
+emotions = ["Anger", "Happiness", "Sadness", "Fear", "Neutral"]
+
+for emotion in emotions:
+    button = tk.Button(root, text=emotion, command=lambda e=emotion: save_emotion_data(e))
+    button.pack(pady=5)
+
+# Button to save all data
+save_button = tk.Button(root, text="Save All Data", command=save_all_data)
+save_button.pack(pady=10)
+
+# Start reading data when the GUI is initialized
+start_reading()
+
+# Ensure the serial reading stops when the GUI is closed
+root.protocol("WM_DELETE_WINDOW", lambda: [stop_reading(), root.destroy()])
+
+# Run the GUI
+root.mainloop()

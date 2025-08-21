@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Satellite Pass Predictor</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <!-- Background Container for the GIF -->
+    <div class="background-container">
+        <iframe src="https://giphy.com/embed/l5JbspfwZ0yjHjlJ0K" width="100%" height="100%" frameborder="0" class="earth-gif" allowfullscreen></iframe>
+    </div>
+
+
+
+    <!-- Navigation Bar -->
+    <header class="navbar">
+        <div class="logo">Satellite Tracker</div>
+        <ul class="nav-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </header>
+
+    <!-- Hero Section with Form -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1>Predict Satellite Passes</h1>
+            <p>Enter your location to receive satellite pass notifications!</p>
+            <form method="POST" class="form-container">
+                <div class="form-group">
+                    <label for="latitude">Latitude:</label>
+                    <input type="text" id="latitude" name="latitude" required>
+                </div>
+                <div class="form-group">
+                    <label for="longitude">Longitude:</label>
+                    <input type="text" id="longitude" name="longitude" required>
+                </div>
+                <div class="form-group">
+                    <label for="notification_time">Notification Time:</label>
+                    <input type="number" id="notification_time" name="notification_time" required>
+                </div>
+                <div class="form-group">
+                    <label for="user_id">Email:</label>
+                    <input type="email" id="user_id" name="user_id" required>
+                </div>
+                <div class="button-container">
+                    <input type="submit" value="Submit">
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Add this section to display the map after form submission -->
+    {% if map_created %}
+        <h2>Satellite Coverage Map</h2>
+        <iframe src="/map" width="100%" height="500"></iframe>
+    {% endif %}
+</body>
+</html>

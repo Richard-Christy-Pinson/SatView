@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Satellite Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="background-container">
+        <iframe src="https://giphy.com/embed/l5JbspfwZ0yjHjlJ0K" width="100%" height="100%" frameborder="0" class="earth-gif" allowfullscreen></iframe>
+    </div>
+
+    <header class="navbar">
+        <div class="logo">Satellite Tracker</div>
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+        </ul>
+    </header>
+
+    <section class="confirmation-section">
+        <div class="confirmation-content">
+            <h1>Satellite Pass Scheduled</h1>
+            <p>Thank you, <strong>{{ user_id }}</strong>. Your satellite pass notifications are scheduled.</p>
+
+            <!-- Next Passes Table -->
+            <div class="details-card">
+                <h2>Next Satellite Passes</h2>
+                <table>
+                    <tr>
+                        <th>Satellite Name</th>
+                        <th>Pass Time (UTC)</th>
+                    </tr>
+                    {% for satellite_name, pass_time in next_passes %}
+                    <tr>
+                        <td>{{ satellite_name }}</td>
+                        <td>{{ pass_time }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+            <!-- Scheduled Notifications -->
+            <div class="details-card">
+                <h2>Scheduled Notifications</h2>
+                <table>
+                    <tr>
+                        <th>Satellite Name</th>
+                        <th>Notification Time (UTC)</th>
+                    </tr>
+                    {% for satellite_name, notify_time in scheduled_notifications %}
+                    <tr>
+                        <td>{{ satellite_name }}</td>
+                        <td>{{ notify_time }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+            <!-- Data Availability Table -->
+            <div class="details-card">
+                <h2>Data Availability</h2>
+                <table>
+                    <tr>
+                        <th>Satellite Name</th>
+                        <th>Data Available By (UTC)</th>
+                    </tr>
+                    {% for satellite_name, data_time in data_availabilities %}
+                    <tr>
+                        <td>{{ satellite_name }}</td>
+                        <td>{{ data_time }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+
+            <!-- Schedule Another Button -->
+            <div class="button-container">
+                <a href="/" class="cta-button">Schedule Another</a>
+            </div>
+
+            <!-- Satellite Coverage Map -->
+            <h2>Satellite Coverage Map</h2>
+            <iframe src="/map" width="100%" height="500"></iframe>
+        </div>
+    </section>
+</body>
+</html>
